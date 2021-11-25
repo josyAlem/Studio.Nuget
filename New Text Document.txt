@@ -1,0 +1,1 @@
+ dotnet nuget push .\LoggerUtility\bin\Release\Studio.LoggerUtility.1.0.0.nupkg --api-key oy2gbwuo5yn2nvtj7vmql26snfqte4oedi3ecg5fyes5fq --source https://api.nuget.org/v3/index.json
