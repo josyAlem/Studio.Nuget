@@ -5,45 +5,33 @@
 
 trigger:
 - master
+jobs:
+- job: Phase_1
+  displayName: Build and push NuGet Package
+  cancelTimeoutInMinutes: 1
+  pool:
+    vmImage: ubuntu-latest
+  variables:
+    buildConfiguration: 'Release'
+  steps:
+  - task: NuGetCommand@2
+    displayName: 'NuGet restore'
+    inputs:
+      command: 'restore'
+      restoreSolution: '**/*.sln'
+      feedsToUse: 'select'
 
-pool:
-  vmImage: ubuntu-latest
+  - script: dotnet build --configuration $(buildConfiguration)
+    displayName: 'dotnet build $(buildConfiguration)'
 
-variables:
-  buildConfiguration: 'Release'
+  - task: DotNetCoreCLI@2
+    displayName: 'NuGet pack'
+    inputs:
+      command: 'pack'
+      packagesToPack: $(nugetPackagePattern)
+      versioningScheme: 'byEnvVar'
+      versionEnvVar: 'nugetVersion'
 
-steps:
-- task: NuGetCommand@2
-  displayName: 'NuGet restore'
-  inputs:
-    command: 'restore'
-    restoreSolution: '**/*.sln'
-    feedsToUse: 'select'
+  - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService)  
+    displayName: 'Nuget push'
 
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: 'NuGet pack'
-  inputs:
-    command: 'pack'
-    packagesToPack: $(nugetPackagePattern)
-    versioningScheme: 'byEnvVar'
-    versionEnvVar: 'nugetVersion'
-
-- script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService)
-  displayName: 'Nuget push'
-
-
-
-# - task: CopyFiles@2
-#   inputs:
-#     SourceFolder: '$(agent.builddirectory)'
-#     Contents: '**'
-#     TargetFolder: '$(build.artifactstagingdirectory)'
-#     CleanTargetFolder: true
-# - task: PublishBuildArtifacts@1
-#   inputs:
-#     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#     ArtifactName: 'drop'
-#     publishLocation: 'Container'
