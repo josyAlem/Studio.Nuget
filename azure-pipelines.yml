@@ -3,9 +3,8 @@
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
-# trigger:
-# - release
-# - master
+trigger:
+- master
 
 pool:
   vmImage: ubuntu-latest
@@ -24,26 +23,27 @@ steps:
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
 
-- task: CopyFiles@2
+- task: DotNetCoreCLI@2
+  displayName: 'NuGet pack'
   inputs:
-    SourceFolder: '$(agent.builddirectory)'
-    Contents: '**'
-    TargetFolder: '$(build.artifactstagingdirectory)'
-    CleanTargetFolder: true
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
-# - task: DotNetCoreCLI@2
-#   displayName: 'NuGet pack'
+    command: 'pack'
+    packagesToPack: $(nugetPackagePattern)
+    versioningScheme: 'byEnvVar'
+    versionEnvVar: 'nugetVersion'
+
+- script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService)
+  displayName: 'Nuget push'
+
+
+
+# - task: CopyFiles@2
 #   inputs:
-#     command: 'pack'
-#     packagesToPack: '**/LoggerUtility.csproj'
-#     versioningScheme: 'byEnvVar'
-#     versionEnvVar: 'nugetVersion'
-
-# - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService)
-#   displayName: 'Nuget push'
-
-
+#     SourceFolder: '$(agent.builddirectory)'
+#     Contents: '**'
+#     TargetFolder: '$(build.artifactstagingdirectory)'
+#     CleanTargetFolder: true
+# - task: PublishBuildArtifacts@1
+#   inputs:
+#     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+#     ArtifactName: 'drop'
+#     publishLocation: 'Container'
