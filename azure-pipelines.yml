@@ -32,19 +32,6 @@ jobs:
       versioningScheme: 'byEnvVar'
       versionEnvVar: 'nugetVersion'
 
-  - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService) --no-symbols 
+  - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --no-symbols --source $(nugetService)  
     displayName: 'Nuget push'
 
-
-
-  # - task: CopyFiles@2
-  #   inputs:
-  #     SourceFolder: '$(agent.builddirectory)'
-  #     Contents: '**'
-  #     TargetFolder: '$(build.artifactstagingdirectory)'
-  #     CleanTargetFolder: true
-  # - task: PublishBuildArtifacts@1
-  #   inputs:
-  #     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-  #     ArtifactName: 'drop'
-  #     publishLocation: 'Container'
