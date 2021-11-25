@@ -5,6 +5,10 @@
 
 trigger:
 - master
+jobs:
+- job: Phase_1
+  displayName: Build and push NuGet Package
+  cancelTimeoutInMinutes: 1
 
 pool:
   vmImage: ubuntu-latest
