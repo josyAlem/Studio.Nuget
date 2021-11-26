@@ -21,6 +21,12 @@ jobs:
     displayName: GitVersion
     inputs:
      versionSpec: 'x.x.x'
+     
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: '$nugetVersion = "$env:GITVERSION_MAJORMINORPATCH" Write-Host ("##vso[task.setvariable variable=nugetVersion;]$nugetVersion")'
+
   - task: NuGetCommand@2
     displayName: 'NuGet restore'
     inputs:
@@ -39,7 +45,7 @@ jobs:
       packagesToPack: $(nugetPackagePattern)
       nobuild: true
       versioningScheme: 'byEnvVar'      
-      versionEnvVar: 'GITVERSION_FullSemVer'
+      versionEnvVar: 'nugetVersion'
 
   - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
     displayName: 'Nuget push'
