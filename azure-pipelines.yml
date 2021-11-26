@@ -26,7 +26,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-           $nugetVersion = "$env:GITVERSION_MAJORMINORPATCH"
+           $nugetVersion = "$env:GitVersion.Major"
            
            Write-Host "Version: $nugetVersion"
       pwsh: true
