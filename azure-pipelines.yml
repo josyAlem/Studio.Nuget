@@ -15,7 +15,6 @@ jobs:
     vmImage: ubuntu-latest
   variables:
     buildConfiguration: 'Release'
-    GitVersion.SemVer: ''
   
   steps:
   - task: gitversion/setup@0
@@ -40,7 +39,7 @@ jobs:
       packagesToPack: $(nugetPackagePattern)
       nobuild: true
       versioningScheme: 'byEnvVar'      
-      versionEnvVar: 'GitVersion.SemVer'
+      versionEnvVar: 'GITVERSION_FullSemVer'
 
   - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
     displayName: 'Nuget push'
