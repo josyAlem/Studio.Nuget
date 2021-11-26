@@ -18,10 +18,14 @@ jobs:
   
   steps:
   - task: gitversion/setup@0
-    displayName: GitVersion
+    displayName: GitVersion Setup
     inputs:
      versionSpec: 'x.x.x'
    
+  - task: gitversion/execute@0
+    displayName: GitVersion Execution
+    inputs:
+       updateAssemblyInfo: true
   - task: PowerShell@2
     inputs:
       targetType: 'inline'
