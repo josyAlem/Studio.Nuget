@@ -6,7 +6,7 @@
 
 
 trigger:
-- feature/*
+- master
 jobs:
 - job: Phase_1
   displayName: Build and push NuGet Package
