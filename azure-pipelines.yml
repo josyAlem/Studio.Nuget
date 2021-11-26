@@ -45,7 +45,7 @@ jobs:
       packagesToPack: $(nugetPackagePattern)
       nobuild: true
       versioningScheme: 'byEnvVar'      
-      versionEnvVar: 'nugetVersion'
+      versionEnvVar: 'GITVERSION_MAJORMINORPATCH'
 
   - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
     displayName: 'Nuget push'
