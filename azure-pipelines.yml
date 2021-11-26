@@ -26,7 +26,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-           $nugetVersion = "$env:GitVersion.Major"
+           $nugetVersion = "$(GitVersion.SemVer)"
            
            Write-Host "Version: $nugetVersion"
       pwsh: true
