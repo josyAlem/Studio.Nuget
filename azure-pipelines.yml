@@ -15,7 +15,13 @@ jobs:
     vmImage: ubuntu-latest
   variables:
     buildConfiguration: 'Release'
+    GitVersion.SemVer: ''
+  
   steps:
+  - task: gitversion/setup@0
+    displayName: GitVersion
+    inputs:
+     versionSpec: 'x.x.x'
   - task: NuGetCommand@2
     displayName: 'NuGet restore'
     inputs:
@@ -30,10 +36,11 @@ jobs:
     displayName: 'NuGet pack'
     inputs:
       command: 'pack'
+      arguments: '--configuration $(buildConfiguration)'
       packagesToPack: $(nugetPackagePattern)
-      versioningScheme: 'byEnvVar'
-      versionEnvVar: 'nugetVersion'
+      nobuild: true
+      versioningScheme: 'byEnvVar'      
+      versionEnvVar: 'GitVersion.SemVer'
 
-  - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService)  
+  - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
     displayName: 'Nuget push'
-
