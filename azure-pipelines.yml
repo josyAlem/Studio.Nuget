@@ -30,7 +30,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-           $nugetVersion = "$env:GITVERSION_SEMVER"
+           $nugetVersion = "$env:GITVERSION_MAJORMINORPATCH"
            
            Write-Host "Version: $nugetVersion"
       pwsh: true
@@ -54,5 +54,5 @@ jobs:
       versioningScheme: 'byEnvVar'      
       versionEnvVar: 'GITVERSION_MAJORMINORPATCH'
 
-  - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
+  - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg;' --api-key $(nugetApiKey) --source $(nugetService)  
     displayName: 'Nuget push'
