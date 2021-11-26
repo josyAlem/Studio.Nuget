@@ -28,7 +28,7 @@ jobs:
       script: |
            $nugetVersion = "$env:GITVERSION_MAJORMINORPATCH"
            
-           Write-Host "$nugetVersion"
+           Write-Host "Version: $nugetVersion"
       pwsh: true
   - task: NuGetCommand@2
     displayName: 'NuGet restore'
