@@ -6,7 +6,7 @@
 
 
 trigger:
-- master
+- feature/*
 jobs:
 - job: Phase_1
   displayName: Build and push NuGet Package
@@ -52,6 +52,16 @@ jobs:
       nobuild: true
       versioningScheme: 'byEnvVar'      
       versionEnvVar: 'nugetVersion'
+  - task: NuGetCommand@2
+    displayName: 'NuGet push to Studio.Nuget'
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '838a1637-5f30-4be5-b238-5d89b7f11556/6ef56d7d-fe79-470d-a768-6cc1df35acad'
+      publishPackageMetadata: false
 
-  - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
-    displayName: 'Nuget push'
+  #enable the below code and disable the above NuGet push to Studio.Nuget task
+  #to deploy to Nuget.Org instead of local
+  # - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
+  #   displayName: 'Nuget push'
