@@ -1,7 +1,9 @@
-# ASP.NET Core
-# Build and test ASP.NET Core projects targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+#Variable: buildConfiguration
+#Variable: nugetPackagePattern
+#Variable: nugetVersion
+#Variable: nugetApiKey
+#Variable: nugetService
+
 
 trigger:
 - master
@@ -13,7 +15,25 @@ jobs:
     vmImage: ubuntu-latest
   variables:
     buildConfiguration: 'Release'
+  
   steps:
+  - task: gitversion/setup@0
+    displayName: GitVersion Setup
+    inputs:
+     versionSpec: 'x.x.x'
+   
+  - task: gitversion/execute@0
+    displayName: GitVersion Execution
+    inputs:
+       updateAssemblyInfo: true
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+           $nugetVersion = "$env:GITVERSION_MAJORMINORPATCH"
+           
+           Write-Host "Version: $nugetVersion"
+      pwsh: true
   - task: NuGetCommand@2
     displayName: 'NuGet restore'
     inputs:
@@ -29,9 +49,19 @@ jobs:
     inputs:
       command: 'pack'
       packagesToPack: $(nugetPackagePattern)
-      versioningScheme: 'byEnvVar'
+      nobuild: true
+      versioningScheme: 'byEnvVar'      
       versionEnvVar: 'nugetVersion'
+  - task: NuGetCommand@2
+    displayName: 'NuGet push to Studio.Nuget'
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '838a1637-5f30-4be5-b238-5d89b7f11556/6ef56d7d-fe79-470d-a768-6cc1df35acad'
+      publishPackageMetadata: false
 
-  - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --api-key $(nugetApiKey) --source $(nugetService)  
-    displayName: 'Nuget push'
-
+  #enable the below code and disable the above NuGet push to Studio.Nuget task
+  #to deploy to Nuget.Org instead of local
+  # - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
+  #   displayName: 'Nuget push'
