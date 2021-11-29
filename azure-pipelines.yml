@@ -1,27 +1,33 @@
-#Variable: buildConfiguration
-#Variable: nugetPackagePattern
-#Variable: nugetVersion
-#Variable: nugetApiKey
-#Variable: nugetService
+#local file Variable: buildConfiguration
+#local file Variable: nugetVersion
+#local file Variable: isMasterBranch
+#local file Variable: isDevelopBranch
+
+#Pipeline Variable: nugetPackagePattern
+#Pipeline Variable: nugetApiKey
+#Pipeline Variable: nugetService
 
 
-trigger:
-- master
+pool:
+ vmImage: ubuntu-latest
+
+variables:
+  isMasterBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+  isDevelopBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  buildConfiguration: 'Release'
+
 jobs:
 - job: Phase_1
-  displayName: Build and push NuGet Package
+  displayName: Build and pack NuGet Package
+  condition: or(eq(variables.isMasterBranch, 'true'),eq(variables.isDevelopBranch, 'true'))
   cancelTimeoutInMinutes: 1
-  pool:
-    vmImage: ubuntu-latest
-  variables:
-    buildConfiguration: 'Release'
-  
+ 
   steps:
   - task: gitversion/setup@0
     displayName: GitVersion Setup
     inputs:
      versionSpec: 'x.x.x'
-   
+
   - task: gitversion/execute@0
     displayName: GitVersion Execution
     inputs:
@@ -52,8 +58,16 @@ jobs:
       nobuild: true
       versioningScheme: 'byEnvVar'      
       versionEnvVar: 'nugetVersion'
+
+- job: Phase_2
+  displayName: Publish NuGet Package
+  dependsOn: Phase_1
+  condition: succeeded()#this job runs if Phase_1 succeeds only 
+  cancelTimeoutInMinutes: 1
+  steps:
   - task: NuGetCommand@2
-    displayName: 'NuGet push to Studio.Nuget'
+    displayName: 'NuGet push to Studio.Nuget Feed'
+    condition: eq(variables.isDevelopBranch, 'true'))#this job runs if only branch=Develop
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
@@ -61,7 +75,6 @@ jobs:
       publishVstsFeed: '838a1637-5f30-4be5-b238-5d89b7f11556/6ef56d7d-fe79-470d-a768-6cc1df35acad'
       publishPackageMetadata: false
 
-  #enable the below code and disable the above NuGet push to Studio.Nuget task
-  #to deploy to Nuget.Org instead of local
-  # - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
-  #   displayName: 'Nuget push'
+  - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
+    displayName: 'Nuget push to Nuget.Org'
+    condition: eq(variables.isMasterBranch, 'true'))#this job runs if only branch=Master
