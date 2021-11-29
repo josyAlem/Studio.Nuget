@@ -8,8 +8,6 @@
 #Pipeline Variable: nugetService
 
 
-pool:
- vmImage: ubuntu-latest
 
 variables:
   isMasterBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
@@ -21,6 +19,9 @@ jobs:
   displayName: Build and pack NuGet Package
   condition: or(eq(variables.isMasterBranch, 'true'),eq(variables.isDevelopBranch, 'true'))
   cancelTimeoutInMinutes: 1
+ 
+  pool:
+   vmImage: ubuntu-latest
  
   steps:
   - task: gitversion/setup@0
@@ -64,6 +65,10 @@ jobs:
   dependsOn: Phase_1
   condition: succeeded()#this job runs if Phase_1 succeeds only 
   cancelTimeoutInMinutes: 1
+  
+  pool:
+   vmImage: ubuntu-latest
+ 
   steps:
   - task: NuGetCommand@2
     displayName: 'NuGet push to Studio.Nuget Feed'
