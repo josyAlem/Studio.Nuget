@@ -8,7 +8,9 @@
 #Pipeline Variable: nugetService
 
 
-
+pool:
+  vmImage: ubuntu-latest
+ 
 variables:
   isMasterBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
   isDevelopBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
@@ -19,9 +21,6 @@ jobs:
   displayName: Build and pack NuGet Package
   condition: or(eq(variables.isMasterBranch, 'true'),eq(variables.isDevelopBranch, 'true'))
   cancelTimeoutInMinutes: 1
- 
-  pool:
-   vmImage: ubuntu-latest
  
   steps:
   - task: gitversion/setup@0
@@ -66,13 +65,10 @@ jobs:
   condition: succeeded()#this job runs if Phase_1 succeeds only 
   cancelTimeoutInMinutes: 1
   
-  pool:
-   vmImage: ubuntu-latest
- 
   steps:
   - task: NuGetCommand@2
     displayName: 'NuGet push to Studio.Nuget Feed'
-    condition: eq(variables.isDevelopBranch, 'true'))#this job runs if only branch=Develop
+    condition: eq(variables.isDevelopBranch, 'true') #this job runs if only branch=Develop
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
