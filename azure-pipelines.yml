@@ -78,4 +78,4 @@ jobs:
 
   - script: dotnet nuget push '$(Build.ArtifactStagingDirectory)/**/*.nupkg' --api-key $(nugetApiKey) --source $(nugetService)  
     displayName: 'Nuget push to Nuget.Org'
-    condition: eq(variables.isMasterBranch, 'true'))#this job runs if only branch=Master
+    condition: eq(variables.isMasterBranch, 'true')#this job runs if only branch=Master
